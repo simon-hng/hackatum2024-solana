@@ -167,8 +167,7 @@ export const CameraFeed = ({
     beginAudioRecording(connection);
   };
 
-  const stopRecording = async () => {
-    //TODO: FIX THIS
+  const stopRecording = () => {
     microphoneRef.current?.stop();
     setFormState("manual");
   };
@@ -391,7 +390,7 @@ export const CameraFeed = ({
             >
               <div
                 className={cn(
-                  "transform select-none rounded-full border-2 border-border p-1 duration-200",
+                  "flex transform select-none rounded-full border-2 border-border p-1 duration-200",
                   {
                     "border-red-500 bg-background/20 p-4":
                       formState === "recording",
@@ -405,6 +404,13 @@ export const CameraFeed = ({
                       formState === "recording",
                   })}
                   variant="outline"
+                  onClick={() => {
+                    if (formState === "initial") {
+                      startRecording();
+                    } else {
+                      stopRecording();
+                    }
+                  }}
                   onTouchStart={() => startRecording()}
                   onTouchEnd={() => stopRecording()}
                 />
