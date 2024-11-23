@@ -6,7 +6,7 @@ const links = [
   { href: "/feed", label: "Feed", icon: Home },
   { href: "/friends", label: "Friends", icon: Users },
   { href: "/new", icon: PlusCircle },
-  { href: "/bets", label: "bets", icon: Award },
+  { href: "/bets", label: "Bets", icon: Award },
   { href: "/profile", label: "Profile", icon: User },
 ];
 
