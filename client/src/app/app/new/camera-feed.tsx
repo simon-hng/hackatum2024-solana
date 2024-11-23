@@ -5,6 +5,7 @@ import {
   type ListenLiveClient,
   LiveTranscriptionEvents,
 } from "@deepgram/sdk";
+import { AnimatePresence, motion } from "motion/react";
 import React from "react";
 import { useRef, useEffect } from "react";
 import { Button } from "~/components/ui/button";
@@ -13,17 +14,13 @@ import { cn } from "~/lib/utils";
 
 const deepgram = createClient(env.NEXT_PUBLIC_DEEPGRAM_API_KEY);
 
-async function getMicrophone() {
-  const userMedia = await navigator.mediaDevices.getUserMedia({
-    audio: true,
-  });
-
-  return new MediaRecorder(userMedia);
-}
-
 export const CameraFeed = () => {
   const beginAudioRecording = async (connection: ListenLiveClient) => {
-    const microphone = await getMicrophone();
+    const microphone = await navigator.mediaDevices
+      .getUserMedia({
+        audio: true,
+      })
+      .then((stream) => new MediaRecorder(stream));
 
     microphone.start(500);
 
@@ -73,6 +70,9 @@ export const CameraFeed = () => {
     await beginAudioRecording(connection);
   };
 
+  const stopRecording = async () => {};
+
+  // Video Preview
   const myVideoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     navigator.mediaDevices
@@ -92,13 +92,26 @@ export const CameraFeed = () => {
   const [isRecording, setIsRecording] = React.useState(false);
 
   return (
-    <div className="relative h-screen overflow-hidden p-2">
+    <div className="animate relative flex h-screen flex-col overflow-hidden p-2 pb-20">
       <video
-        className="h-full rounded-lg object-cover"
+        className={cn("h-full rounded-lg object-cover")}
         playsInline
         ref={myVideoRef}
         autoPlay
       />
+
+      <AnimatePresence>
+        {isRecording && (
+          <motion.div
+            initial={{ height: 0 }}
+            animate={{ height: "32rem" }}
+            exit={{ height: 0 }}
+          >
+            Information
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="fixed bottom-24 left-1/2 -translate-x-1/2">
         <div
           className={cn(
@@ -114,9 +127,11 @@ export const CameraFeed = () => {
             })}
             variant="outline"
             onTouchStart={() => {
+              // startRecording();
               setIsRecording(true);
             }}
             onTouchEnd={() => {
+              // stopRecording();
               setIsRecording(false);
             }}
           />
