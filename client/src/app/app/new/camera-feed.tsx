@@ -54,7 +54,14 @@ export const CameraFeed = ({
   users: Pick<User, "id" | "fullName" | "imageUrl">[];
 }) => {
   const form = useForm<z.infer<typeof challengeSchema>>({
-    resolver: zodResolver(challengeSchema),
+    resolver: zodResolver(
+      challengeSchema.pick({
+        challenged: true,
+        title: true,
+        amount: true,
+        dueDate: true,
+      }),
+    ),
     defaultValues: {
       challenged: "",
       title: "",
@@ -177,8 +184,9 @@ export const CameraFeed = ({
       <form
         className="animate relative flex h-screen flex-col overflow-hidden p-2 pb-20"
         onSubmit={form.handleSubmit((data) => {
+          console.log(data);
           createChallenge({ ...data, challenger: "me" });
-        })}
+        }, console.error)}
       >
         <motion.video
           exit={{ opacity: 0, height: 0 }}

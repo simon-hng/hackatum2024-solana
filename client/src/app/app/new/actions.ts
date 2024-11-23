@@ -11,8 +11,11 @@ export async function createChallenge(data: z.infer<typeof challengeSchema>) {
 
   return await db.challenge.create({
     data: {
-      ...data,
-      amount: Number(data.amount) / 100,
+      title: data.title,
+      challenger: data.challenger,
+      challenged: data.challenged,
+      dueDate: data.dueDate,
+      amount: Number(data.amount) * 100,
     },
   });
 }
