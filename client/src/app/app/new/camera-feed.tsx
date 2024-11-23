@@ -15,8 +15,9 @@ import { cn } from "~/lib/utils";
 const deepgram = createClient(env.NEXT_PUBLIC_DEEPGRAM_API_KEY);
 
 export const CameraFeed = () => {
+  let microphone: MediaRecorder;
   const beginAudioRecording = async (connection: ListenLiveClient) => {
-    const microphone = await navigator.mediaDevices
+    microphone = await navigator.mediaDevices
       .getUserMedia({
         audio: true,
       })
@@ -26,12 +27,11 @@ export const CameraFeed = () => {
 
     microphone.onstart = () => {
       console.log("client: microphone opened");
-      document.body.classList.add("recording");
     };
 
     microphone.onstop = () => {
       console.log("client: microphone closed");
-      document.body.classList.remove("recording");
+      connection.requestClose();
     };
 
     microphone.ondataavailable = (e) => {
@@ -42,6 +42,11 @@ export const CameraFeed = () => {
   };
 
   const startRecording = async () => {
+    setIsRecording(true);
+
+    // saving tokens like the broke boy i am
+    return;
+
     const connection = deepgram.listen.live({
       model: "nova-2",
       language: "en-US",
@@ -56,6 +61,7 @@ export const CameraFeed = () => {
       connection.on(LiveTranscriptionEvents.Transcript, (data) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         console.log(data.channel.alternatives[0].transcript);
+        setText((text) => text + data.channel.alternatives[0].transcript);
       });
 
       connection.on(LiveTranscriptionEvents.Metadata, (data) => {
@@ -70,7 +76,10 @@ export const CameraFeed = () => {
     await beginAudioRecording(connection);
   };
 
-  const stopRecording = async () => {};
+  const stopRecording = async () => {
+    setIsRecording(false);
+    microphone?.stop();
+  };
 
   // Video Preview
   const myVideoRef = useRef<HTMLVideoElement>(null);
@@ -90,6 +99,7 @@ export const CameraFeed = () => {
   }, []);
 
   const [isRecording, setIsRecording] = React.useState(false);
+  const [text, setText] = React.useState("");
 
   return (
     <div className="animate relative flex h-screen flex-col overflow-hidden p-2 pb-20">
@@ -107,7 +117,7 @@ export const CameraFeed = () => {
             animate={{ height: "32rem" }}
             exit={{ height: 0 }}
           >
-            Information
+            {text}
           </motion.div>
         )}
       </AnimatePresence>
@@ -126,14 +136,8 @@ export const CameraFeed = () => {
               "border-red-500 bg-red-500 active:bg-red-500": isRecording,
             })}
             variant="outline"
-            onTouchStart={() => {
-              // startRecording();
-              setIsRecording(true);
-            }}
-            onTouchEnd={() => {
-              // stopRecording();
-              setIsRecording(false);
-            }}
+            onTouchStart={() => startRecording()}
+            onTouchEnd={() => stopRecording()}
           />
         </div>
       </div>
