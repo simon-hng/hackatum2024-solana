@@ -92,6 +92,7 @@ export const CameraFeed = () => {
       connection.on(LiveTranscriptionEvents.Transcript, (data) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         console.log(data.channel.alternatives[0].transcript);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         setText((text) => text + data.channel.alternatives[0].transcript);
       });
 

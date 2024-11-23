@@ -10,7 +10,7 @@ type NavItem = {
   href: string;
 };
 
-const navigation: NavItem[] = [{ name: "App", href: "/app" }];
+const navigation: NavItem[] = [{ name: "App", href: "/app/new" }];
 
 export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
