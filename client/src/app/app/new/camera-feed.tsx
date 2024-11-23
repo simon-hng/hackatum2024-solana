@@ -25,19 +25,17 @@ import { Textarea } from "@components/ui/textarea";
 import { Input } from "@components/ui/input";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
+import { challengeSchema } from "~/lib/schemas/challenge";
 
 const deepgram = createClient(env.NEXT_PUBLIC_DEEPGRAM_API_KEY);
 
-export const CameraFeed = () => {
-  const betSchema = z.object({
-    challenger: z.string(),
-    challenged: z.string(),
-    title: z.string(),
-    amount: z.number(),
-  });
-
-  const form = useForm<z.infer<typeof betSchema>>({
-    resolver: zodResolver(betSchema),
+export const CameraFeed = ({
+  submit,
+}: {
+  submit: (data: z.infer<typeof challengeSchema>) => void;
+}) => {
+  const form = useForm<z.infer<typeof challengeSchema>>({
+    resolver: zodResolver(challengeSchema),
     defaultValues: {
       challenger: "me",
       challenged: "",
@@ -135,7 +133,10 @@ export const CameraFeed = () => {
 
   return (
     <Form {...form}>
-      <form className="animate relative flex h-screen flex-col overflow-hidden p-2 pb-20">
+      <form
+        className="animate relative flex h-screen flex-col overflow-hidden p-2 pb-20"
+        onSubmit={form.handleSubmit(submit)}
+      >
         <video
           className={cn("h-full rounded-lg object-cover")}
           playsInline
@@ -194,7 +195,7 @@ export const CameraFeed = () => {
             <Button
               type="button"
               className={cn("h-16 w-16 rounded-full", {
-                "hover:bg-red-500 border-red-500 bg-red-500 active:bg-red-500":
+                "border-red-500 bg-red-500 hover:bg-red-500 active:bg-red-500":
                   isRecording,
               })}
               variant="outline"
