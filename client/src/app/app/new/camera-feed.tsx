@@ -39,8 +39,10 @@ import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { challengeSchema } from "~/lib/schemas/challenge";
 import { type User } from "@clerk/nextjs/server";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
 import { EuroInput } from "~/components/euro-input";
+import { format } from "date-fns";
+import { Calendar } from "~/components/ui/calendar";
 
 const deepgram = createClient(env.NEXT_PUBLIC_DEEPGRAM_API_KEY);
 
@@ -57,6 +59,7 @@ export const CameraFeed = ({
       challenged: "",
       title: "",
       amount: "5",
+      dueDate: new Date(),
     },
   });
 
@@ -178,7 +181,7 @@ export const CameraFeed = ({
                 exit={{ height: 0 }}
                 className={cn("flex flex-col gap-8 pt-2")}
               >
-                <div>
+                <div className="flex flex-col gap-2">
                   <FormField
                     control={form.control}
                     name="challenged"
@@ -250,7 +253,7 @@ export const CameraFeed = ({
                     control={form.control}
                     name="title"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>to</FormLabel>
                         <FormControl>
                           <Textarea placeholder="Catch a rocket" {...field} />
@@ -264,11 +267,54 @@ export const CameraFeed = ({
                     control={form.control}
                     name="amount"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>with</FormLabel>
                         <FormControl>
                           <EuroInput {...field} />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="dueDate"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>until</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "pl-3 text-left font-normal",
+                                  !field.value && "text-muted-foreground",
+                                )}
+                              >
+                                {field.value ? (
+                                  format(field.value, "PPP")
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) =>
+                                date > new Date() ||
+                                date < new Date("1900-01-01")
+                              }
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
