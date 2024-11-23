@@ -71,7 +71,7 @@ export const CameraFeed = ({
   };
 
   const startRecording = async () => {
-    setIsRecording(true);
+    setFormState("recording");
 
     // saving tokens like the broke boy i am
     return;
@@ -107,7 +107,7 @@ export const CameraFeed = ({
   };
 
   const stopRecording = async () => {
-    setIsRecording(false);
+    setFormState("manual");
     microphone?.stop();
   };
 
@@ -128,7 +128,11 @@ export const CameraFeed = ({
       });
   }, []);
 
-  const [isRecording, setIsRecording] = React.useState(false);
+  const STATE = ["initial", "recording", "manual", "done"] as const;
+
+  const [formState, setFormState] =
+    React.useState<(typeof STATE)[number]>("initial");
+
   const [text, setText] = React.useState("");
 
   return (
@@ -137,19 +141,25 @@ export const CameraFeed = ({
         className="animate relative flex h-screen flex-col overflow-hidden p-2 pb-20"
         onSubmit={form.handleSubmit(submit)}
       >
-        <video
-          className={cn("h-full rounded-lg object-cover")}
-          playsInline
-          ref={myVideoRef}
-          autoPlay
-        />
+        <AnimatePresence>
+          {["initial", "recording"].includes(formState) && (
+            <motion.video
+              exit={{ opacity: 0, height: 0 }}
+              className={cn("h-full rounded-lg object-cover")}
+              playsInline
+              ref={myVideoRef}
+              autoPlay
+            />
+          )}
+        </AnimatePresence>
 
         <AnimatePresence>
-          {isRecording && (
+          {!(formState === "initial") && (
             <motion.div
               initial={{ height: 0 }}
-              animate={{ height: "32rem" }}
+              animate={{ height: "initial" }}
               exit={{ height: 0 }}
+              className="mb-36"
             >
               <FormField
                 control={form.control}
@@ -183,27 +193,35 @@ export const CameraFeed = ({
           )}
         </AnimatePresence>
 
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2">
-          <div
-            className={cn(
-              "border-border transform rounded-full border-2 p-1 duration-200",
-              {
-                "bg-background/20 border-red-500 p-4": isRecording,
-              },
-            )}
-          >
-            <Button
-              type="button"
-              className={cn("h-16 w-16 rounded-full", {
-                "border-red-500 bg-red-500 hover:bg-red-500 active:bg-red-500":
-                  isRecording,
-              })}
-              variant="outline"
-              onTouchStart={() => startRecording()}
-              onTouchEnd={() => stopRecording()}
-            />
-          </div>
-        </div>
+        <AnimatePresence>
+          {["initial", "recording"].includes(formState) && (
+            <motion.div
+              className="fixed bottom-24 left-1/2 -translate-x-1/2"
+              exit={{ opacity: 0 }}
+            >
+              <div
+                className={cn(
+                  "border-border transform rounded-full border-2 p-1 duration-200",
+                  {
+                    "bg-background/20 border-red-500 p-4":
+                      formState === "recording",
+                  },
+                )}
+              >
+                <Button
+                  type="button"
+                  className={cn("h-16 w-16 rounded-full", {
+                    "border-red-500 bg-red-500 hover:bg-red-500 active:bg-red-500":
+                      formState === "recording",
+                  })}
+                  variant="outline"
+                  onTouchStart={() => startRecording()}
+                  onTouchEnd={() => stopRecording()}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </form>
     </Form>
   );
