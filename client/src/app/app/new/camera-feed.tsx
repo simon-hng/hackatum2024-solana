@@ -22,7 +22,7 @@ import { AnimatePresence, motion } from "motion/react";
 import React from "react";
 import { useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { type z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { env } from "~/env";
 import {
@@ -110,7 +110,7 @@ export const CameraFeed = ({
         const transcript = data.channel.alternatives.at(0)?.transcript;
 
         const currentChallenged = users.find(
-          (user) => user.id === form.getValues()["challenged"],
+          (user) => user.id === form.getValues().challenged,
         );
         const challenged = await parseTranscript(
           `Find out the person by name that addressed. 
@@ -129,12 +129,12 @@ export const CameraFeed = ({
         }
 
         const title = await parseTranscript(
-          `Find out a suitable title for the bet. The current value is "${form.getValues()["title"]}", if you find a strictly better value return that, otherwise the previouse one. This is the transcript: "${transcript}"`,
+          `Find out a suitable title for the bet. The current value is "${form.getValues().title}", if you find a strictly better value return that, otherwise the previouse one. This is the transcript: "${transcript}"`,
         );
         form.setValue("title", title);
 
         const amount = await parseTranscript(
-          `Find out a suitable amount of money for the bet. The current value is "${form.getValues()["amount"]}", if you find a strictly better value return that, otherwise the previouse one. This is the transcript: "${transcript}"`,
+          `Find out a suitable amount of money for the bet. The current value is "${form.getValues().amount}", if you find a strictly better value return that, otherwise the previouse one. This is the transcript: "${transcript}"`,
         );
         form.setValue("amount", amount);
       });

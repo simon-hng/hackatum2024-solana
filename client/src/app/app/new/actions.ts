@@ -1,7 +1,7 @@
 "use server";
 
-import { challengeSchema } from "~/lib/schemas/challenge";
-import { z } from "zod";
+import { type challengeSchema } from "~/lib/schemas/challenge";
+import { type z } from "zod";
 import { db } from "~/server/db";
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";

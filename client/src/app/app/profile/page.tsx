@@ -31,7 +31,7 @@ export default async function ProfilePage() {
     walletBalance = await wallet.getEURCBalance();
   }
 
-  const walletLink = `https://explorer.solana.com/address/${wallet.eurcAccount}?cluster=devnet`;
+  const walletLink = `https://explorer.solana.com/address/${wallet.eurcAccount.toBase58()}?cluster=devnet`;
 
   return (
     <div className="flex h-screen w-screen items-center justify-center p-5">
@@ -53,9 +53,9 @@ export default async function ProfilePage() {
 
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
-              <Wallet className="h-6 w-6 text-primary" />
+              <Wallet className="text-primary h-6 w-6" />
               <div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Your SOL Wallet Public Key:
                 </p>
                 <a href={walletLink} className="break-all font-mono text-sm">
@@ -65,14 +65,12 @@ export default async function ProfilePage() {
             </div>
 
             <div className="flex items-center space-x-3">
-              <Coins className="h-6 w-6 text-primary" />
+              <Coins className="text-primary h-6 w-6" />
               <div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Your EURC Balance:
                 </p>
-                <p className="text-xl font-semibold">
-                  {walletBalance}
-                </p>
+                <p className="text-xl font-semibold">{walletBalance}</p>
               </div>
             </div>
           </div>
