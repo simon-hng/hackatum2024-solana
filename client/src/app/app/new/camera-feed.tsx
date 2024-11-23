@@ -9,7 +9,7 @@ export const CameraFeed = () => {
     navigator.mediaDevices
       .getUserMedia({
         video: true,
-        audio: true,
+        // audio: true,
       })
       .then((stream: MediaStream) => {
         if (myVideoRef.current) {

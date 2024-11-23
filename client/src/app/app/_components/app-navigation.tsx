@@ -14,7 +14,7 @@ export const AppNavigation = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
-        "bg-background fixed bottom-0 left-0 w-full rounded-t shadow",
+        "bg-background border-t-border fixed bottom-0 left-0 w-full rounded-t shadow",
         className,
       )}
     >
@@ -22,7 +22,7 @@ export const AppNavigation = ({ className }: { className?: string }) => {
         {links.map((link) => (
           <Link
             key={link.href}
-            href={`app/${link.href}`}
+            href={`./${link.href}`}
             className="fles flex min-w-16 flex-col items-center"
           >
             {!!link.label && (
