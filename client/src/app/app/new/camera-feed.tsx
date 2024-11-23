@@ -43,14 +43,14 @@ import { CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
 import { EuroInput } from "~/components/euro-input";
 import { format } from "date-fns";
 import { Calendar } from "~/components/ui/calendar";
+import { createChallenge, parseTranscript } from "./actions";
+import Fuze from "fuse.js";
 
 const deepgram = createClient(env.NEXT_PUBLIC_DEEPGRAM_API_KEY);
 
 export const CameraFeed = ({
-  submit,
   users,
 }: {
-  submit: (data: z.infer<typeof challengeSchema>) => void;
   users: Pick<User, "id" | "fullName" | "imageUrl">[];
 }) => {
   const form = useForm<z.infer<typeof challengeSchema>>({
@@ -64,14 +64,10 @@ export const CameraFeed = ({
   });
 
   let microphone: MediaRecorder;
-  const beginAudioRecording = async (connection: ListenLiveClient) => {
-    microphone = await navigator.mediaDevices
-      .getUserMedia({
-        audio: true,
-      })
-      .then((stream) => new MediaRecorder(stream));
+  const beginAudioRecording = (connection: ListenLiveClient) => {
+    if (!microphone) return;
 
-    microphone.start(500);
+    microphone.start(1000);
 
     microphone.onstart = () => {
       console.log("client: microphone opened");
@@ -89,11 +85,8 @@ export const CameraFeed = ({
     };
   };
 
-  const startRecording = async () => {
+  const startRecording = () => {
     setFormState("recording");
-
-    // saving tokens like the broke boy i am
-    return;
 
     const connection = deepgram.listen.live({
       model: "nova-2",
@@ -106,11 +99,37 @@ export const CameraFeed = ({
         console.log("Connection closed.");
       });
 
-      connection.on(LiveTranscriptionEvents.Transcript, (data) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        console.log(data.channel.alternatives[0].transcript);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        setText((text) => text + data.channel.alternatives[0].transcript);
+      connection.on(LiveTranscriptionEvents.Transcript, async (data) => {
+        const transcript = data.channel.alternatives.at(0)?.transcript;
+
+        const currentChallenged = users.find(
+          (user) => user.id === form.getValues()["challenged"],
+        );
+        const challenged = await parseTranscript(
+          `Find out the person by name that addressed. 
+          The current value is "${currentChallenged?.fullName}".
+          If you find a strictly better value return that, otherwise the previouse one. 
+
+          This is a list of all possible users:
+          ${users.map((user) => user.fullName).join(", ")}
+          This is the transcript: "${transcript}"`,
+        );
+        const challengedID = new Fuze(users, { keys: ["fullName"] })
+          .search(challenged)
+          .at(0)?.item.id;
+        if (challengedID) {
+          form.setValue("challenged", challengedID);
+        }
+
+        const title = await parseTranscript(
+          `Find out a suitable title for the bet. The current value is "${form.getValues()["title"]}", if you find a strictly better value return that, otherwise the previouse one. This is the transcript: "${transcript}"`,
+        );
+        form.setValue("title", title);
+
+        const amount = await parseTranscript(
+          `Find out a suitable amount of money for the bet. The current value is "${form.getValues()["amount"]}", if you find a strictly better value return that, otherwise the previouse one. This is the transcript: "${transcript}"`,
+        );
+        form.setValue("amount", amount);
       });
 
       connection.on(LiveTranscriptionEvents.Metadata, (data) => {
@@ -122,12 +141,12 @@ export const CameraFeed = ({
       });
     });
 
-    await beginAudioRecording(connection);
+    beginAudioRecording(connection);
   };
 
   const stopRecording = async () => {
+    //TODO: FIX THIS
     setFormState("manual");
-    microphone?.stop();
   };
 
   // Video Preview
@@ -136,8 +155,10 @@ export const CameraFeed = ({
     navigator.mediaDevices
       .getUserMedia({
         video: true,
+        audio: true,
       })
       .then((stream: MediaStream) => {
+        microphone = new MediaRecorder(stream);
         if (myVideoRef.current) {
           myVideoRef.current.srcObject = stream;
         }
@@ -151,19 +172,18 @@ export const CameraFeed = ({
   const [formState, setFormState] =
     React.useState<(typeof STATE)[number]>("initial");
 
-  const [text, setText] = React.useState("");
-
   return (
     <Form {...form}>
       <form
         className="animate relative flex h-screen flex-col overflow-hidden p-2 pb-20"
         onSubmit={form.handleSubmit((data) => {
-          submit({ ...data, challenger: "me" });
+          createChallenge({ ...data, challenger: "me" });
         })}
       >
         <motion.video
           exit={{ opacity: 0, height: 0 }}
           className={cn("h-full rounded-2xl object-cover")}
+          muted
           playsInline
           ref={myVideoRef}
           autoPlay
@@ -307,10 +327,7 @@ export const CameraFeed = ({
                               mode="single"
                               selected={field.value}
                               onSelect={field.onChange}
-                              disabled={(date) =>
-                                date > new Date() ||
-                                date < new Date("1900-01-01")
-                              }
+                              disabled={(date) => date < new Date()}
                               initialFocus
                             />
                           </PopoverContent>
@@ -320,8 +337,6 @@ export const CameraFeed = ({
                     )}
                   />
                 </div>
-
-                {text}
               </motion.div>
             )}
           </AnimatePresence>

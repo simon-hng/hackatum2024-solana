@@ -1,8 +1,5 @@
 import React from "react";
 import { CameraFeed } from "./camera-feed";
-import { challengeSchema } from "~/lib/schemas/challenge";
-import { z } from "zod";
-import { db } from "~/server/db";
 import { clerk } from "~/server/clerk";
 
 export default async function NewPage() {
@@ -13,10 +10,6 @@ export default async function NewPage() {
       imageUrl: user.imageUrl,
     })),
   );
-  async function createChallenge(data: z.infer<typeof challengeSchema>) {
-    "use server";
 
-    return await db.challenge.create({ data });
-  }
-  return <CameraFeed submit={createChallenge} users={users} />;
+  return <CameraFeed users={users} />;
 }
