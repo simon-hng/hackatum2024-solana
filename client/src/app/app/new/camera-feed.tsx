@@ -45,6 +45,7 @@ import { format } from "date-fns";
 import { Calendar } from "~/components/ui/calendar";
 import { createChallenge, parseTranscript } from "./actions";
 import Fuze from "fuse.js";
+import { title } from "process";
 
 const deepgram = createClient(env.NEXT_PUBLIC_DEEPGRAM_API_KEY);
 
@@ -70,22 +71,23 @@ export const CameraFeed = ({
     },
   });
 
-  let microphone: MediaRecorder;
+  const microphoneRef = useRef<MediaRecorder | null>(null);
   const beginAudioRecording = (connection: ListenLiveClient) => {
-    if (!microphone) return;
+    if (!microphoneRef.current || microphoneRef.current.state === "recording")
+      return;
 
-    microphone.start(1000);
+    microphoneRef.current.start(1000);
 
-    microphone.onstart = () => {
+    microphoneRef.current.onstart = () => {
       console.log("client: microphone opened");
     };
 
-    microphone.onstop = () => {
+    microphoneRef.current.onstop = () => {
       console.log("client: microphone closed");
       connection.requestClose();
     };
 
-    microphone.ondataavailable = (e) => {
+    microphoneRef.current.ondataavailable = (e) => {
       const data = e.data;
       console.log("client: sent data to websocket");
       connection.send(data);
@@ -106,38 +108,52 @@ export const CameraFeed = ({
         console.log("Connection closed.");
       });
 
-      connection.on(LiveTranscriptionEvents.Transcript, async (data) => {
-        const transcript = data.channel.alternatives.at(0)?.transcript;
+      connection.on(
+        LiveTranscriptionEvents.Transcript,
+        (data: { channel: { alternatives: { transcript: string }[] } }) => {
+          const transcript: string =
+            data.channel.alternatives.at(0)?.transcript ?? "";
 
-        const currentChallenged = users.find(
-          (user) => user.id === form.getValues().challenged,
-        );
-        const challenged = await parseTranscript(
-          `Find out the person by name that addressed. 
+          const currentChallenged = users.find(
+            (user) => user.id === form.getValues().challenged,
+          );
+
+          parseTranscript(
+            `Find out the person by name that addressed. 
           The current value is "${currentChallenged?.fullName}".
           If you find a strictly better value return that, otherwise the previouse one. 
 
           This is a list of all possible users:
           ${users.map((user) => user.fullName).join(", ")}
           This is the transcript: "${transcript}"`,
-        );
-        const challengedID = new Fuze(users, { keys: ["fullName"] })
-          .search(challenged)
-          .at(0)?.item.id;
-        if (challengedID) {
-          form.setValue("challenged", challengedID);
-        }
+          )
+            .then((challenged) => {
+              const challengedID = new Fuze(users, { keys: ["fullName"] })
+                .search(challenged)
+                .at(0)?.item.id;
+              if (challengedID) {
+                form.setValue("challenged", challengedID);
+              }
+            })
+            .catch(console.error);
 
-        const title = await parseTranscript(
-          `Find out a suitable title for the bet. The current value is "${form.getValues().title}", if you find a strictly better value return that, otherwise the previouse one. This is the transcript: "${transcript}"`,
-        );
-        form.setValue("title", title);
+          parseTranscript(
+            `Find out a suitable title for the bet. The current value is "${form.getValues().title}", if you find a strictly better value return that, otherwise the previouse one. This is the transcript: "${transcript}"`,
+          )
+            .then((title) => {
+              form.setValue("title", title);
+            })
+            .catch(console.error);
 
-        const amount = await parseTranscript(
-          `Find out a suitable amount of money for the bet. The current value is "${form.getValues().amount}", if you find a strictly better value return that, otherwise the previouse one. This is the transcript: "${transcript}"`,
-        );
-        form.setValue("amount", amount);
-      });
+          parseTranscript(
+            `Find out a suitable amount of money for the bet. The current value is "${form.getValues().amount}", if you find a strictly better value return that, otherwise the previouse one. This is the transcript: "${transcript}"`,
+          )
+            .then((amount) => {
+              form.setValue("amount", amount);
+            })
+            .catch(console.error);
+        },
+      );
 
       connection.on(LiveTranscriptionEvents.Metadata, (data) => {
         console.log(data);
@@ -153,6 +169,7 @@ export const CameraFeed = ({
 
   const stopRecording = async () => {
     //TODO: FIX THIS
+    microphoneRef.current?.stop();
     setFormState("manual");
   };
 
@@ -165,7 +182,7 @@ export const CameraFeed = ({
         audio: true,
       })
       .then((stream: MediaStream) => {
-        microphone = new MediaRecorder(stream);
+        microphoneRef.current = new MediaRecorder(stream);
         if (myVideoRef.current) {
           myVideoRef.current.srcObject = stream;
         }
@@ -175,6 +192,7 @@ export const CameraFeed = ({
       });
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const STATE = ["initial", "recording", "manual", "done"] as const;
   const [formState, setFormState] =
     React.useState<(typeof STATE)[number]>("initial");
@@ -183,9 +201,10 @@ export const CameraFeed = ({
     <Form {...form}>
       <form
         className="animate relative flex h-screen flex-col overflow-hidden p-2 pb-20"
-        onSubmit={form.handleSubmit((data) => {
+        onSubmit={form.handleSubmit(async (data) => {
           console.log(data);
-          createChallenge({ ...data, challenger: "me" });
+          // TODO: add current user
+          await createChallenge({ ...data, challenger: "me" });
         }, console.error)}
       >
         <motion.video
@@ -372,9 +391,9 @@ export const CameraFeed = ({
             >
               <div
                 className={cn(
-                  "border-border transform select-none rounded-full border-2 p-1 duration-200",
+                  "transform select-none rounded-full border-2 border-border p-1 duration-200",
                   {
-                    "bg-background/20 border-red-500 p-4":
+                    "border-red-500 bg-background/20 p-4":
                       formState === "recording",
                   },
                 )}
