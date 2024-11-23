@@ -1,8 +1,9 @@
 "use client";
 
+import React from "react";
 import { useRef, useEffect } from "react";
 
-export const Video = () => {
+export const CameraFeed = () => {
   const myVideoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     navigator.mediaDevices
@@ -22,7 +23,12 @@ export const Video = () => {
 
   return (
     <div className="relative">
-      <video className="h-screen mx-auto" playsInline ref={myVideoRef} autoPlay />
+      <video
+        className="mx-auto h-screen"
+        playsInline
+        ref={myVideoRef}
+        autoPlay
+      />
     </div>
   );
 };

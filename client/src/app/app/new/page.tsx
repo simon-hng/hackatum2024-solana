@@ -1,5 +1,6 @@
-import { Video } from "./video";
+import React from "react";
+import { CameraFeed } from "./camera-feed";
 
 export default async function NewPage() {
-  return <Video />;
+  return <CameraFeed />;
 }
