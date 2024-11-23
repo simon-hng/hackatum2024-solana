@@ -6,9 +6,7 @@ const AppPage = () => {
 
   return (
     <HydrateClient>
-      <div className="app-page">
-        <h1>App Page</h1>
-      </div>
+      <div></div>
     </HydrateClient>
   );
 };
