@@ -19,6 +19,12 @@ model Post {
     @@index([name])
 }
 
+model Account {
+    id        Int    @id @default(autoincrement())
+    owner     String
+    secretKey Bytes
+}
+
 model Challenge {
     id         Int      @id @default(autoincrement())
     title      String

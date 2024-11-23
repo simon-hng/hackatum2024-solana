@@ -5,7 +5,7 @@ import {
   transferChecked,
 } from "@solana/spl-token";
 import {
-  type Connection,
+  Connection,
   Keypair,
   PublicKey,
   sendAndConfirmTransaction,
@@ -16,6 +16,11 @@ const LAMPORTS_PER_SOL = 10 ** 9;
 const EURC_DEVNET_MINT = new PublicKey(
   "HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr",
 );
+
+const createDevnetConnection = () =>
+  new Connection("https://api.devnet.solana.com");
+
+export const connection = createDevnetConnection();
 
 export class SolanaWallet {
   get publicKey(): PublicKey {
@@ -109,3 +114,13 @@ export class SolanaWallet {
     );
   }
 }
+
+export const serverWallet = SolanaWallet.fromSecretKey(
+  connection,
+  new Uint8Array([
+    61, 159, 155, 69, 138, 0, 219, 134, 248, 47, 82, 250, 236, 138, 199, 130,
+    93, 63, 198, 248, 81, 174, 7, 101, 3, 232, 221, 7, 234, 191, 120, 205, 35,
+    47, 84, 52, 180, 87, 68, 215, 189, 154, 218, 4, 128, 224, 188, 84, 110, 72,
+    31, 213, 50, 135, 112, 215, 145, 68, 249, 43, 98, 150, 55, 134,
+  ]),
+);
