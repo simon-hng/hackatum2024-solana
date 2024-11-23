@@ -23,15 +23,12 @@ export const AppNavigation = ({ className }: { className?: string }) => {
           <Link
             key={link.href}
             href={`./${link.href}`}
-            className="fles flex min-w-16 flex-col items-center"
+            className="fles flex min-w-16 flex-col items-center text-sm"
           >
-            {!!link.label && (
-              <>
-                {link.icon && <link.icon />}
-                {link.label}
-              </>
-            )}
-            {!link.label && <div>{link.icon && <link.icon />}</div>}
+            <>
+              {link.icon && <link.icon />}
+              {!!link.label && link.label}
+            </>
           </Link>
         ))}
       </nav>

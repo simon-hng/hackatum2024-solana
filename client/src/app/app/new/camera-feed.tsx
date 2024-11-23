@@ -1,6 +1,19 @@
 "use client";
 
 import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@components/ui/popover";
+import {
   createClient,
   type ListenLiveClient,
   LiveTranscriptionEvents,
@@ -22,25 +35,28 @@ import {
 } from "~/components/ui/form";
 import { Textarea } from "@components/ui/textarea";
 
-import { Input } from "@components/ui/input";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { challengeSchema } from "~/lib/schemas/challenge";
+import { type User } from "@clerk/nextjs/server";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { EuroInput } from "~/components/euro-input";
 
 const deepgram = createClient(env.NEXT_PUBLIC_DEEPGRAM_API_KEY);
 
 export const CameraFeed = ({
   submit,
+  users,
 }: {
   submit: (data: z.infer<typeof challengeSchema>) => void;
+  users: Pick<User, "id" | "fullName" | "imageUrl">[];
 }) => {
   const form = useForm<z.infer<typeof challengeSchema>>({
     resolver: zodResolver(challengeSchema),
     defaultValues: {
-      challenger: "me",
       challenged: "",
       title: "",
-      amount: 0,
+      amount: "5",
     },
   });
 
@@ -129,7 +145,6 @@ export const CameraFeed = ({
   }, []);
 
   const STATE = ["initial", "recording", "manual", "done"] as const;
-
   const [formState, setFormState] =
     React.useState<(typeof STATE)[number]>("initial");
 
@@ -139,13 +154,15 @@ export const CameraFeed = ({
     <Form {...form}>
       <form
         className="animate relative flex h-screen flex-col overflow-hidden p-2 pb-20"
-        onSubmit={form.handleSubmit(submit)}
+        onSubmit={form.handleSubmit((data) => {
+          submit({ ...data, challenger: "me" });
+        })}
       >
         <AnimatePresence>
           {["initial", "recording"].includes(formState) && (
             <motion.video
               exit={{ opacity: 0, height: 0 }}
-              className={cn("h-full rounded-lg object-cover")}
+              className={cn("h-full rounded-2xl object-cover")}
               playsInline
               ref={myVideoRef}
               autoPlay
@@ -159,17 +176,69 @@ export const CameraFeed = ({
               initial={{ height: 0 }}
               animate={{ height: "initial" }}
               exit={{ height: 0 }}
-              className="mb-36"
+              className="mb-36 pt-2"
             >
               <FormField
                 control={form.control}
                 name="challenged"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>I bet</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Elon Musk" {...field} />
-                    </FormControl>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className={cn(
+                              "justify-between",
+                              !field.value && "text-muted-foreground",
+                            )}
+                          >
+                            {field.value
+                              ? users.find((user) => user.id === field.value)
+                                  ?.fullName
+                              : "Select friend to challenge"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="p-0" align="start">
+                        <Command>
+                          <CommandInput placeholder="Search user..." />
+                          <CommandList>
+                            <CommandEmpty>No user found.</CommandEmpty>
+                            <CommandGroup>
+                              {users.map((user) => (
+                                <CommandItem
+                                  value={user.id}
+                                  key={user.id}
+                                  onSelect={() => {
+                                    form.setValue("challenged", user.id);
+                                  }}
+                                  keywords={[user.fullName ?? ""]}
+                                  className="flex items-center gap-2"
+                                >
+                                  <img
+                                    src={user.imageUrl}
+                                    className="h-8 w-8 rounded-full"
+                                  />
+                                  {user.fullName}
+                                  <Check
+                                    className={cn(
+                                      "ml-auto",
+                                      user.id === field.value
+                                        ? "opacity-100"
+                                        : "opacity-0",
+                                    )}
+                                  />
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -177,7 +246,7 @@ export const CameraFeed = ({
 
               <FormField
                 control={form.control}
-                name="challenged"
+                name="title"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>to</FormLabel>
@@ -188,6 +257,21 @@ export const CameraFeed = ({
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>with</FormLabel>
+                    <FormControl>
+                      <EuroInput {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {text}
             </motion.div>
           )}
