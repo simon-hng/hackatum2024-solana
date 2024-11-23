@@ -42,3 +42,5 @@ export const EuroInput = React.forwardRef<
     </div>
   );
 });
+
+EuroInput.displayName = "EuroInput";

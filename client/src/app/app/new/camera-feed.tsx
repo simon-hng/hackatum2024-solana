@@ -158,124 +158,142 @@ export const CameraFeed = ({
           submit({ ...data, challenger: "me" });
         })}
       >
-        <AnimatePresence>
-          {["initial", "recording"].includes(formState) && (
-            <motion.video
-              exit={{ opacity: 0, height: 0 }}
-              className={cn("h-full rounded-2xl object-cover")}
-              playsInline
-              ref={myVideoRef}
-              autoPlay
-            />
-          )}
-        </AnimatePresence>
+        <motion.video
+          exit={{ opacity: 0, height: 0 }}
+          className={cn("h-full rounded-2xl object-cover")}
+          playsInline
+          ref={myVideoRef}
+          autoPlay
+        />
 
-        <AnimatePresence>
-          {!(formState === "initial") && (
-            <motion.div
-              initial={{ height: 0 }}
-              animate={{ height: "initial" }}
-              exit={{ height: 0 }}
-              className="mb-36 pt-2"
-            >
-              <FormField
-                control={form.control}
-                name="challenged"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>I bet</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
+        <div className="flex flex-col gap-8">
+          <AnimatePresence>
+            {!(formState === "initial") && (
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{
+                  height: "initial",
+                  marginBottom: formState === "recording" ? "9rem" : 0,
+                }}
+                exit={{ height: 0 }}
+                className={cn("flex flex-col gap-8 pt-2")}
+              >
+                <div>
+                  <FormField
+                    control={form.control}
+                    name="challenged"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col">
+                        <FormLabel>I bet</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "justify-between",
+                                  !field.value && "text-muted-foreground",
+                                )}
+                              >
+                                {field.value
+                                  ? users.find(
+                                      (user) => user.id === field.value,
+                                    )?.fullName
+                                  : "Select friend to challenge"}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="p-0" align="start">
+                            <Command>
+                              <CommandInput placeholder="Search user..." />
+                              <CommandList>
+                                <CommandEmpty>No user found.</CommandEmpty>
+                                <CommandGroup>
+                                  {users.map((user) => (
+                                    <CommandItem
+                                      value={user.id}
+                                      key={user.id}
+                                      onSelect={() => {
+                                        form.setValue("challenged", user.id);
+                                      }}
+                                      keywords={[user.fullName ?? ""]}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <img
+                                        src={user.imageUrl}
+                                        className="h-8 w-8 rounded-full"
+                                      />
+                                      {user.fullName}
+                                      <Check
+                                        className={cn(
+                                          "ml-auto",
+                                          user.id === field.value
+                                            ? "opacity-100"
+                                            : "opacity-0",
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>to</FormLabel>
                         <FormControl>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            className={cn(
-                              "justify-between",
-                              !field.value && "text-muted-foreground",
-                            )}
-                          >
-                            {field.value
-                              ? users.find((user) => user.id === field.value)
-                                  ?.fullName
-                              : "Select friend to challenge"}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
+                          <Textarea placeholder="Catch a rocket" {...field} />
                         </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="p-0" align="start">
-                        <Command>
-                          <CommandInput placeholder="Search user..." />
-                          <CommandList>
-                            <CommandEmpty>No user found.</CommandEmpty>
-                            <CommandGroup>
-                              {users.map((user) => (
-                                <CommandItem
-                                  value={user.id}
-                                  key={user.id}
-                                  onSelect={() => {
-                                    form.setValue("challenged", user.id);
-                                  }}
-                                  keywords={[user.fullName ?? ""]}
-                                  className="flex items-center gap-2"
-                                >
-                                  <img
-                                    src={user.imageUrl}
-                                    className="h-8 w-8 rounded-full"
-                                  />
-                                  {user.fullName}
-                                  <Check
-                                    className={cn(
-                                      "ml-auto",
-                                      user.id === field.value
-                                        ? "opacity-100"
-                                        : "opacity-0",
-                                    )}
-                                  />
-                                </CommandItem>
-                              ))}
-                            </CommandGroup>
-                          </CommandList>
-                        </Command>
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>to</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Catch a rocket" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>with</FormLabel>
+                        <FormControl>
+                          <EuroInput {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>with</FormLabel>
-                    <FormControl>
-                      <EuroInput {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                {text}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-              {text}
-            </motion.div>
-          )}
-        </AnimatePresence>
+          <AnimatePresence>
+            {formState === "manual" && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col-reverse justify-between gap-2"
+              >
+                <Button variant="outline">Cancel</Button>
+                <Button type="submit">Submit</Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         <AnimatePresence>
           {["initial", "recording"].includes(formState) && (
@@ -285,7 +303,7 @@ export const CameraFeed = ({
             >
               <div
                 className={cn(
-                  "border-border transform rounded-full border-2 p-1 duration-200",
+                  "border-border transform select-none rounded-full border-2 p-1 duration-200",
                   {
                     "bg-background/20 border-red-500 p-4":
                       formState === "recording",
