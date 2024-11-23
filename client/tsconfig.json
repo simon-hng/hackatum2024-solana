@@ -37,7 +37,9 @@
     "**/*.tsx",
     "**/*.cjs",
     "**/*.js",
-    ".next/types/**/*.ts"
-, "src/app/landing.jsx"  ],
+    ".next/types/**/*.ts",
+    "src/app/landing.jsx",
+    "src/app/landing.jsx"
+  ],
   "exclude": ["node_modules"]
 }

@@ -22,7 +22,7 @@ export const Video = () => {
 
   return (
     <div className="relative">
-      <video className="h-full w-full" playsInline ref={myVideoRef} autoPlay />
+      <video className="h-screen mx-auto" playsInline ref={myVideoRef} autoPlay />
     </div>
   );
 };
