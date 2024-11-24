@@ -46,6 +46,8 @@ import { Calendar } from "~/components/ui/calendar";
 import { createChallenge, parseTranscript } from "./actions";
 import Fuze from "fuse.js";
 import Image from "next/image";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const deepgram = createClient(env.NEXT_PUBLIC_DEEPGRAM_API_KEY);
 
@@ -155,6 +157,7 @@ export const CameraFeed = ({
     beginAudioRecording(connection);
   };
 
+  const router = useRouter();
   const stopRecording = () => {
     microphoneRef.current?.stop();
     setFormState("manual");
@@ -191,7 +194,19 @@ export const CameraFeed = ({
         onSubmit={form.handleSubmit(async (data) => {
           console.log(data);
           // TODO: add current user
-          await createChallenge({ ...data, challenger: "me" });
+          toast.promise(
+            createChallenge({ ...data }).then((data) => {
+              router.push("./bets");
+              return data;
+            }),
+            {
+              loading: "Loading...",
+              success: (data) => {
+                return `Bet ${data.title} has been added`;
+              },
+              error: "Error",
+            },
+          );
         }, console.error)}
       >
         <motion.video

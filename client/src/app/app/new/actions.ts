@@ -23,6 +23,7 @@ export async function createChallenge(data: z.infer<typeof challengeSchema>) {
       challenged: data.challenged,
       dueDate: data.dueDate,
       amount: Number(data.amount) * 100,
+      status: "PENDING",
     },
   });
 }

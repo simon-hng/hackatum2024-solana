@@ -4,6 +4,7 @@ import { connection, serverWallet, SolanaWallet } from "~/server/solana-wallet";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Coins, Wallet } from "lucide-react";
+import Image from "next/image";
 
 export default async function ProfilePage() {
   const user = await currentUser();
@@ -42,7 +43,7 @@ export default async function ProfilePage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="text-center">
+          <div className="flex flex-col items-center text-center">
             <h2 className="mb-2 text-3xl font-semibold">
               Hello {user.firstName ?? ""}
             </h2>
