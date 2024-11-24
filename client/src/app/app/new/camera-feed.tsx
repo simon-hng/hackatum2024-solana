@@ -166,6 +166,11 @@ export const CameraFeed = ({
   // Video Preview
   const myVideoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
+    if (!navigator.mediaDevices) {
+      console.error("getUserMedia is not supported in this browser");
+      return;
+    }
+
     navigator.mediaDevices
       .getUserMedia({
         video: true,
