@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "~/trpc/react";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -17,7 +18,13 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <TRPCReactProvider>
-        <html lang="en" className={`${GeistSans.variable}`}>
+        <html
+          lang="en"
+          className={`${GeistSans.variable} select-none overflow-hidden`}
+        >
+          <Script id="disable-context" strategy="afterInteractive">
+            {`document.addEventListener('contextmenu', (e) => e.preventDefault());`}
+          </Script>
           <body>{children}</body>
         </html>
       </TRPCReactProvider>

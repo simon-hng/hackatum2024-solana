@@ -73,7 +73,9 @@ export default async function BetsPage() {
                     height={50}
                   />
                 </TableCell>
-                <TableCell>{challenge.title}</TableCell>
+                <TableCell>
+                  <Link href={`bets/${challenge.id}`}>{challenge.title}</Link>
+                </TableCell>
                 <TableCell>
                   {(Number(challenge.amount) / 100).toFixed(2)}€
                 </TableCell>
@@ -114,9 +116,7 @@ export default async function BetsPage() {
                   height={50}
                 />
               </TableCell>
-              <TableCell>
-                <Link href={`bets/${challenge.id}`}>{challenge.title}</Link>
-              </TableCell>
+              <TableCell>{challenge.title}</TableCell>
               <TableCell>
                 {(Number(challenge.amount) / 100).toFixed(2)}€
               </TableCell>
