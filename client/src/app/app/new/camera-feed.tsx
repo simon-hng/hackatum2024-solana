@@ -187,7 +187,7 @@ export const CameraFeed = ({
   return (
     <Form {...form}>
       <form
-        className="animate relative flex h-screen flex-col overflow-hidden p-2"
+        className="animate relative flex h-svh flex-col overflow-hidden p-2"
         onSubmit={form.handleSubmit(async (data) => {
           console.log(data);
           // TODO: add current user
