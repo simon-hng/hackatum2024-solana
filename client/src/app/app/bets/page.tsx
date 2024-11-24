@@ -11,6 +11,7 @@ import {
 import { clerk } from "~/server/clerk";
 import Image from "next/image";
 import { StatusBadge } from "~/components/status-badge";
+import Link from "next/link";
 
 export default async function BetsPage() {
   const { userId } = await auth();
@@ -86,7 +87,7 @@ export default async function BetsPage() {
       )}
 
       <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-        You are challenging
+        You are betting
       </h3>
 
       <Table>
@@ -113,7 +114,9 @@ export default async function BetsPage() {
                   height={50}
                 />
               </TableCell>
-              <TableCell>{challenge.title}</TableCell>
+              <TableCell>
+                <Link href={`bets/${challenge.id}`}>{challenge.title}</Link>
+              </TableCell>
               <TableCell>
                 {(Number(challenge.amount) / 100).toFixed(2)}€
               </TableCell>

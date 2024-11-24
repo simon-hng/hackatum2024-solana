@@ -3,11 +3,11 @@ import Link from "next/link";
 import { cn } from "~/lib/utils";
 
 const links = [
-  { href: "/feed", label: "Feed", icon: Home },
-  { href: "/friends", label: "Friends", icon: Users },
-  { href: "/new", icon: PlusCircle },
-  { href: "/bets", label: "Bets", icon: Award },
-  { href: "/profile", label: "Profile", icon: User },
+  { href: "/app/feed", label: "Feed", icon: Home },
+  { href: "/app/friends", label: "Friends", icon: Users },
+  { href: "/app/new", icon: PlusCircle },
+  { href: "/app/bets", label: "Bets", icon: Award },
+  { href: "/app/profile", label: "Profile", icon: User },
 ];
 
 export const AppNavigation = ({ className }: { className?: string }) => {
@@ -22,7 +22,7 @@ export const AppNavigation = ({ className }: { className?: string }) => {
         {links.map((link) => (
           <Link
             key={link.href}
-            href={`./${link.href}`}
+            href={link.href}
             className="fles flex min-w-16 flex-col items-center text-sm"
           >
             <>

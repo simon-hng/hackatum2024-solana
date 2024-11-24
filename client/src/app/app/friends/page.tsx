@@ -13,7 +13,7 @@ import Image from "next/image";
 export default async function FriendsPage() {
   const users = await clerk.users.getUserList();
   return (
-    <div>
+    <div className="p-4">
       <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
         Friends
       </h2>
