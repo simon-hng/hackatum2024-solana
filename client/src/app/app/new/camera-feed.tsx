@@ -45,7 +45,7 @@ import { format } from "date-fns";
 import { Calendar } from "~/components/ui/calendar";
 import { createChallenge, parseTranscript } from "./actions";
 import Fuze from "fuse.js";
-import { title } from "process";
+import Image from "next/image";
 
 const deepgram = createClient(env.NEXT_PUBLIC_DEEPGRAM_API_KEY);
 
@@ -104,10 +104,6 @@ export const CameraFeed = ({
     });
 
     connection.on(LiveTranscriptionEvents.Open, () => {
-      connection.on(LiveTranscriptionEvents.Close, () => {
-        console.log("Connection closed.");
-      });
-
       connection.on(
         LiveTranscriptionEvents.Transcript,
         (data: { channel: { alternatives: { transcript: string }[] } }) => {
@@ -154,14 +150,6 @@ export const CameraFeed = ({
             .catch(console.error);
         },
       );
-
-      connection.on(LiveTranscriptionEvents.Metadata, (data) => {
-        console.log(data);
-      });
-
-      connection.on(LiveTranscriptionEvents.Error, (err) => {
-        console.error(err);
-      });
     });
 
     beginAudioRecording(connection);
@@ -199,7 +187,7 @@ export const CameraFeed = ({
   return (
     <Form {...form}>
       <form
-        className="animate relative flex h-screen flex-col overflow-hidden p-2 pb-20"
+        className="animate relative flex h-screen flex-col overflow-hidden p-2"
         onSubmit={form.handleSubmit(async (data) => {
           console.log(data);
           // TODO: add current user
@@ -270,9 +258,12 @@ export const CameraFeed = ({
                                       keywords={[user.fullName ?? ""]}
                                       className="flex items-center gap-2"
                                     >
-                                      <img
+                                      <Image
                                         src={user.imageUrl}
+                                        alt={`${user.fullName}'s profile picture`}
                                         className="h-8 w-8 rounded-full"
+                                        width={32}
+                                        height={32}
                                       />
                                       {user.fullName}
                                       <Check
@@ -375,7 +366,15 @@ export const CameraFeed = ({
                 exit={{ opacity: 0 }}
                 className="flex flex-col-reverse justify-between gap-2"
               >
-                <Button variant="outline">Cancel</Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setFormState("initial");
+                  }}
+                >
+                  Cancel
+                </Button>
                 <Button type="submit">Submit</Button>
               </motion.div>
             )}

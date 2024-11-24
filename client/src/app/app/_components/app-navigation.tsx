@@ -14,7 +14,7 @@ export const AppNavigation = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
-        "bg-background border-t-border fixed bottom-0 left-0 w-full rounded-t shadow",
+        "w-full rounded-t border-t-border bg-background shadow",
         className,
       )}
     >

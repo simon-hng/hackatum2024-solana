@@ -4,7 +4,7 @@ export default function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div>
+    <div className="flex h-screen flex-col justify-between">
       {children}
       <AppNavigation />
     </div>

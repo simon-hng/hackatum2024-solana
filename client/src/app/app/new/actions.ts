@@ -5,14 +5,21 @@ import { type z } from "zod";
 import { db } from "~/server/db";
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
+import { auth } from "@clerk/nextjs/server";
 
 export async function createChallenge(data: z.infer<typeof challengeSchema>) {
   "use server";
 
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("You must be logged in to create a challenge");
+  }
+
   return await db.challenge.create({
     data: {
       title: data.title,
-      challenger: data.challenger,
+      challenger: userId,
       challenged: data.challenged,
       dueDate: data.dueDate,
       amount: Number(data.amount) * 100,
