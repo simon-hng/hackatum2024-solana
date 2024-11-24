@@ -36,43 +36,27 @@ export default async function ProfilePage() {
 
   return (
     <div className="flex h-svh w-svw items-center justify-center p-5">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-center text-2xl font-bold">
-            Profile
+            Hello {user.firstName ?? ""}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex flex-col items-center text-center">
-            <h2 className="mb-2 text-3xl font-semibold">
-              Hello {user.firstName ?? ""}
-            </h2>
-            <Badge variant="secondary" className="px-3 py-1 text-lg">
-              User
-            </Badge>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <Wallet className="h-6 w-6 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Your SOL Wallet Public Key:
-                </p>
-                <a href={walletLink} className="break-all font-mono text-sm">
-                  {wallet.eurcAccount.toBase58()}
-                </a>
-              </div>
+          <div className="grid grid-cols-[24px_1fr] gap-4">
+            <Wallet className="h-6 w-6 self-center text-primary" />
+            <div>
+              <p className="text-sm text-muted-foreground">EURC Account</p>
+              <a href={walletLink} className="break-all font-mono text-sm">
+                {wallet.eurcAccount.toBase58()}
+              </a>
             </div>
-
-            <div className="flex items-center space-x-3">
-              <Coins className="h-6 w-6 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Your EURC Balance:
-                </p>
-                <p className="text-xl font-semibold">{walletBalance}</p>
-              </div>
+            <Coins className="h-6 w-6 self-center text-primary" />
+            <div>
+              <p className="text-sm text-muted-foreground">EURC Balance</p>
+              <p className="text-xl font-semibold">
+                {walletBalance.toFixed(2)}€
+              </p>
             </div>
           </div>
         </CardContent>
