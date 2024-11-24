@@ -65,6 +65,14 @@ export default function BetStatus({
           <StatusBadge status={status as string} />
         </div>
       </CardContent>
+      <div className="space-y-2 p-2">
+        <button className="w-full rounded-md bg-green-600 py-2 font-bold text-white">
+          Accept Bet
+        </button>
+        <button className="w-full rounded-md bg-red-500 py-2 font-bold text-white">
+          Decline
+        </button>
+      </div>
     </Card>
   );
 }

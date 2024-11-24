@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@components/ui/table";
 import Image from "next/image";
+import Link from "next/link";
 
 export default async function FriendsPage() {
   const users = await clerk.users.getUserList();
@@ -38,7 +39,9 @@ export default async function FriendsPage() {
                   height={50}
                 />
               </TableCell>
-              <TableCell>{user.fullName}</TableCell>
+              <TableCell>
+                <Link href={`friends/${user.id}`}>{user.fullName}</Link>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
